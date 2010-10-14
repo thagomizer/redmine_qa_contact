@@ -3,5 +3,7 @@
 <div class="box">
 <p><%= f.text_field :name, :size => 30, :required => true %></p>
 <p><%= f.select :assigned_to_id, @project.users.collect{|u| [u.name, u.id]}, :include_blank => true %></p>
-<p><%= f.select :qa_contact_id, @project.users.collect{|u| [u.name, u.id]}, :include_blank => true %></p>
+<% if @project.module_enabled?('qa_contact') -%>
+  <p><%= f.select :qa_contact_id, @project.users.collect{|u| [u.name, u.id]}, :include_blank => true %></p>
+<% end -%>
 </div>

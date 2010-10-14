@@ -5,6 +5,7 @@ class QaContactIssuesHook < Redmine::Hook::ViewListener
   # * :issue => Issue being rendered
   #
   def view_issues_show_details_bottom(context = { })
+    return '' unless context[:project].module_enabled?('qa_contact')
     issue = context[:issue]
 
     if issue.qa_contact then
@@ -21,6 +22,8 @@ class QaContactIssuesHook < Redmine::Hook::ViewListener
   # * :issue => Issue being created/editted
   #
   def view_issues_form_details_bottom(context = { })
+    return '' unless context[:project].module_enabled?('qa_contact')
+
     select = context[:form].select :qa_contact_id, context[:project].assignable_users.collect {|u| [u.name, u.id]}, :include_blank => true
     return "<p>#{select}</p>"
   end

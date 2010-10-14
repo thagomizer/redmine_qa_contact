@@ -9,5 +9,9 @@ Redmine::Plugin.register :redmine_qa_contact do
   name 'Redmine Qa Contact plugin'
   author 'Aja Hammerly'
   description 'This plugin adds a QA contact field (ala bugzilla) to Redmine'
-  version '0.0.1'
+  version '0.0.2'
+
+  project_module :qa_contact do
+    permission :qa_contact, :public => true
+  end
 end

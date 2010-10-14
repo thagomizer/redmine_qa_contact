@@ -13,6 +13,9 @@ class IssueCategoriesControllerTest < ActionController::TestCase
     @response   = ActionController::TestResponse.new
     User.current = nil
     @request.session[:user_id] = 2
+
+    # Turn on the qa_contact module
+    EnabledModule.create(:project_id => 1, :name => "qa_contact")
   end
 
   def test_get_new
@@ -49,5 +52,14 @@ class IssueCategoriesControllerTest < ActionController::TestCase
 
     assert_redirected_to '/projects/ecookbook/settings/categories'
     assert_equal User.find(1), IssueCategory.find(2).qa_contact
+  end
+
+  def test_project_with_qa_contact_disabled
+    project = Project.find(2)
+
+    get :new, :project_id => '2'
+    assert_response :success
+    assert_template 'new'
+    assert_no_match /QA contact/, @response.body
   end
 end

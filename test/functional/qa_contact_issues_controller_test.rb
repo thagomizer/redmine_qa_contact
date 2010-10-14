@@ -42,6 +42,9 @@ class IssuesControllerTest < ActionController::TestCase
     @request    = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
     User.current = nil
+
+    # Turn on the qa_contact module
+    EnabledModule.create(:project_id => 1, :name => "qa_contact")
   end
 
   def test_show_has_qa_contact
@@ -65,18 +68,48 @@ class IssuesControllerTest < ActionController::TestCase
     assert_match /QA contact/, @response.body
   end
 
-  def test_new_has_qa_contact
+  def test_show_has_qa_contact_if_enabled
+    issue = create_new_issue
     username = User.find(2).name(:firstname_lastname)
 
     @request.session[:user_id] = 2
-    get :new, :project_id => 1
+    get :show, :id => issue.id
     assert_response :success
 
     assert_match /QA contact/, @response.body
-    assert_match(/#{username}/, @response.body)
+    assert_match /#{username}/, @response.body
+
+    # If no qa_contact it shouldn't error
+    issue.qa_contact = nil
+    issue.save!
+
+    get :show, :id => issue.id
+    assert_response :success
+
+    assert_match /QA contact/, @response.body
   end
 
-  def test_edit_has_qa_contact
+  def test_new_does_not_have_qa_contact_if_disabled
+    username = User.find(2).name(:firstname_lastname)
+
+    @request.session[:user_id] = 2
+    get :new, :project_id => 2
+    assert_response :success
+
+    assert_no_match /QA contact/, @response.body
+  end
+
+  def test_new_does_not_have_qa_contact_if_disabled
+    username = User.find(2).name(:firstname_lastname)
+
+    @request.session[:user_id] = 2
+    get :new, :project_id => 2
+    assert_response :success
+
+    assert_no_match /QA contact/, @response.body
+  end
+
+  def test_edit_has_qa_contact_if_enabled
     issue = create_new_issue
     username = User.find(2).name(:firstname_lastname)
 
@@ -88,22 +121,19 @@ class IssuesControllerTest < ActionController::TestCase
     assert_match /#{username}/, @response.body
   end
 
-  def test_bulk_edit_has_qa_contact
-    issues = []
-    3.times do
-      issues << create_new_issue
-    end
+  def test_edit_has_qa_contact_if_enabled
+    issue = create_new_issue
+    issue.project_id = 2
+    issue.save!
 
     username = User.find(2).name(:firstname_lastname)
 
     @request.session[:user_id] = 2
-    get :bulk_edit, :ids => issues.collect{|i| i.id}
+    get :edit, :id => issue.id
     assert_response :success
 
-    assert_match /QA contact/, @response.body
-    assert_match /#{username}/, @response.body
+    assert_no_match /QA contact/, @response.body
   end
-
 
   def test_set_qa_contact_on_create
     @request.session[:user_id] = 2
