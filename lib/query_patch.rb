@@ -3,7 +3,7 @@ require_dependency 'query'
 # Patches Redmine's Queries dynamically.
 # Adds a filter on qa_contact_id
 module QueryPatch
-    def self.included(base) # :nodoc:
+  def self.included(base) # :nodoc:
     base.extend(ClassMethods)
 
     base.send(:include, InstanceMethods)
