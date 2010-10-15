@@ -5,6 +5,9 @@ class QueryPatchTest < ActiveSupport::TestCase
 
   def setup
     User.current = User.find(1)
+
+    # Turn on qa_contact for project 1
+    EnabledModule.create!(:project_id => 1, :name => "qa_contact")
   end
 
   def teardown

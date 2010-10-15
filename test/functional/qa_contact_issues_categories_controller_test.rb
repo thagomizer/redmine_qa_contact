@@ -15,7 +15,7 @@ class IssueCategoriesControllerTest < ActionController::TestCase
     @request.session[:user_id] = 2
 
     # Turn on the qa_contact module
-    EnabledModule.create(:project_id => 1, :name => "qa_contact")
+    EnabledModule.create!(:project_id => 1, :name => "qa_contact")
   end
 
   def test_get_new
@@ -36,6 +36,14 @@ class IssueCategoriesControllerTest < ActionController::TestCase
     category = IssueCategory.find_by_name('New category')
     assert_not_nil category
     assert_equal User.find(1), category.qa_contact
+  end
+
+  def test_get_edit
+    issue = IssueCategory.create!(:name => "Category", :qa_contact => User.find(4), :assigned_to => User.find(3), :project => Project.find(1))
+
+    get :edit, :id => issue.id
+    assert_response :success
+    assert_match /QA contact/, @response.body
   end
 
   def test_post_edit
@@ -60,6 +68,12 @@ class IssueCategoriesControllerTest < ActionController::TestCase
     get :new, :project_id => '2'
     assert_response :success
     assert_template 'new'
+    assert_no_match /QA contact/, @response.body
+
+    issue = IssueCategory.create!(:name => "Category", :qa_contact => User.find(4), :assigned_to => User.find(3), :project => project)
+
+    get :edit, :id => issue.id
+    assert_response :success
     assert_no_match /QA contact/, @response.body
   end
 end

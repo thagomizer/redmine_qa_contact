@@ -39,7 +39,11 @@ module QueryPatch
 
       user_values = []
       if project
-        user_values += project.users.sort.collect{|s| [s.name, s.id.to_s] }
+        if !project.module_enabled?('qa_contact')
+          qa_contact_filters = { }
+        else
+          user_values += project.users.sort.collect{|s| [s.name, s.id.to_s] }
+        end
       else
         project_ids = Project.all(:conditions => Project.visible_by(User.current)).collect(&:id)
         if project_ids.any?

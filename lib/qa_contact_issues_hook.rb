@@ -34,6 +34,7 @@ class QaContactIssuesHook < Redmine::Hook::ViewListener
   # * :project => project for the issue
   #
   def view_issues_bulk_edit_details_bottom(context = { })
+    return '' unless context[:project].module_enabled?('qa_contact')
     select = select_tag('qa_contact_id',
                         content_tag('option', l(:label_no_change_option), :value => '') +
                         options_from_collection_for_select(context[:project].assignable_users, :id, :name))

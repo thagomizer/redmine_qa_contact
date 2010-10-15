@@ -44,28 +44,7 @@ class IssuesControllerTest < ActionController::TestCase
     User.current = nil
 
     # Turn on the qa_contact module
-    EnabledModule.create(:project_id => 1, :name => "qa_contact")
-  end
-
-  def test_show_has_qa_contact
-    issue = create_new_issue
-    username = User.find(2).name(:firstname_lastname)
-
-    @request.session[:user_id] = 2
-    get :show, :id => issue.id
-    assert_response :success
-
-    assert_match /QA contact/, @response.body
-    assert_match /#{username}/, @response.body
-
-    # If no qa_contact it shouldn't error
-    issue.qa_contact = nil
-    issue.save!
-
-    get :show, :id => issue.id
-    assert_response :success
-
-    assert_match /QA contact/, @response.body
+    EnabledModule.create!(:project_id => 1, :name => "qa_contact")
   end
 
   def test_show_has_qa_contact_if_enabled
@@ -121,7 +100,7 @@ class IssuesControllerTest < ActionController::TestCase
     assert_match /#{username}/, @response.body
   end
 
-  def test_edit_has_qa_contact_if_enabled
+  def test_edit_does_not_have_qa_contact_if_disabled
     issue = create_new_issue
     issue.project_id = 2
     issue.save!
@@ -131,6 +110,24 @@ class IssuesControllerTest < ActionController::TestCase
     @request.session[:user_id] = 2
     get :edit, :id => issue.id
     assert_response :success
+
+    assert_no_match /QA contact/, @response.body
+  end
+
+  def test_bulk_edit_has_qa_contact_if_enabled
+    @request.session[:user_id] = 2
+    get :bulk_edit, :ids => [1, 2]
+    assert_response :success
+    assert_template 'bulk_edit'
+
+    assert_match /QA contact/, @response.body
+  end
+
+  def test_bulk_edit_does_not_have_qa_contact_if_disabled
+    @request.session[:user_id] = 2
+    get :bulk_edit, :ids => [4]
+    assert_response :success
+    assert_template 'bulk_edit'
 
     assert_no_match /QA contact/, @response.body
   end
