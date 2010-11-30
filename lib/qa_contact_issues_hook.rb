@@ -64,7 +64,9 @@ class QaContactIssuesHook < Redmine::Hook::ViewListener
   def controller_issues_edit_before_save(context = { })
     if context[:params][:issue][:qa_contact_id] then
       qa_contact_id = context[:params][:issue][:qa_contact_id]
-      context[:issue].qa_contact = User.find(qa_contact_id)
+      unless qa_contact_id == ''
+        context[:issue].qa_contact = User.find(qa_contact_id)
+      end
     end
 
     return ''

@@ -54,7 +54,9 @@ module QueryPatch
 
       qa_contact_filters = {"qa_contact_id" => { :type => :list_optional, :order => 4, :values => user_values }} unless user_values.empty?
 
-      return @available_filters.merge(qa_contact_filters)
+      return @available_filters.merge(qa_contact_filters) if qa_contact_filters
+
+      return @available_filters
     end
   end
 end

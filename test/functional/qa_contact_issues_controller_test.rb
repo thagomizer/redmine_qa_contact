@@ -167,6 +167,15 @@ class IssuesControllerTest < ActionController::TestCase
     assert_equal User.find(1), issue.qa_contact
   end
 
+  def test_edit_with_no_qa_contact
+    issue = Issue.find(1)
+    assert_equal nil, issue.qa_contact_id
+
+    put :update, :id => 1, :issue => {:assigned_to_id => 2,
+                                      :qa_contact_id => ''}
+    assert_redirected_to :action => 'show', :id => '1'
+  end
+
   def test_bulk_edit_qa_contact
     u = User.find(User.count)
     assert_not_nil u
