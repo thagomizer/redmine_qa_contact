@@ -1,0 +1,30 @@
+<% resolved = IssueStatus.find_by_name("Resolved").id %>
+
+<% qa_contact_issues_count = Issue.visible.count(:conditions  => {:qa_contact_id => User.current.id, :status_id => resolved}) %>
+
+
+
+<% qa_contact_issues = Issue.visible.find( :all, 
+					   :conditions	=> { :qa_contact_id => User.current.id, :status_id => resolved},
+					   :include	=> [ :status, :project, :tracker ], 
+                                           :limit       => 10,
+					   :order	=> "#{Issue.table_name}.updated_on DESC") %>
+<h3><%=l(:label_qa_contact_issues)%> (<%= qa_contact_issues_count %>)</h3>
+
+
+
+<%= render :partial => 'issues/list_simple', :locals => { :issues => qa_contact_issues } %>
+<% if qa_contact_issues.length > 0 %>
+<p class="small"><%= link_to l(:label_issue_view_all), :controller	=> 'issues', 
+						       :action		=> 'index', 
+						       :status_id	=> resolved,
+                                                       :qa_contact_id   => User.current.id,
+						       :sort		=> 'updated_on:desc' %></p>
+<% end %>
+
+<% content_for :header_tags do %>
+<%= auto_discovery_link_tag(:atom, 
+                            {:controller => 'issues', :action => 'index', :set_filter => 1,
+                             :author_id => 'me', :format => 'atom', :key => User.current.rss_key},
+                            {:title => l(:label_qa_contact_issues)}) %>
+<% end %>

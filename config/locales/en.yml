@@ -1,4 +1,4 @@
 # English strings go here for Rails i18n
 en:
-  my_label: "My label"
   field_qa_contact: "QA contact"
+  label_qa_contact_issues: "Issues to test"
