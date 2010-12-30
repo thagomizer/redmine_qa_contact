@@ -160,11 +160,22 @@ class IssuesControllerTest < ActionController::TestCase
     issue.reload
     assert_equal User.find(3), issue.qa_contact
 
+    # Verify the journal comments are correct
+    assert_equal 1, issue.journals.last.details.count
+    details = issue.journals.last.details.first
+    assert_equal "qa_contact_id", details.prop_key
+    assert_equal "3", details.value
+    assert_nil details.old_value
+
     put :update, :id => 1, :issue => {:qa_contact_id => 1}
     assert_redirected_to :action => 'show', :id => '1'
 
+
     issue.reload
     assert_equal User.find(1), issue.qa_contact
+
+    get :show, :id => 1
+    assert_match(/<strong>QA contact<\/strong> changed from <i>#{User.find(3).name}<\/i> to <i>#{User.find(1).name}<\/i>/, @response.body)
   end
 
   def test_edit_with_no_qa_contact
@@ -186,7 +197,7 @@ class IssuesControllerTest < ActionController::TestCase
                        :notes => 'Bulk editing',
                        :qa_contact_id => u.id
 
-    assert_response 302
+    assert_response :redirect
 
     # Verify both issues were updated
     assert_equal [u.id, u.id], Issue.find_all_by_id([1, 2]).collect {|i| i.qa_contact_id}

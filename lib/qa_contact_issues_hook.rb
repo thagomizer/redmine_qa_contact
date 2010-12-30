@@ -1,4 +1,12 @@
 class QaContactIssuesHook < Redmine::Hook::ViewListener
+  def find_name_by_reflection(field, id)
+    association = Issue.reflect_on_association(field.to_sym)
+    if association
+      record = association.class_name.constantize.find_by_id(id)
+      return record.name if record
+    end
+  end
+
   # Renders the QA Contact Name
   #
   # Context:
@@ -89,4 +97,19 @@ class QaContactIssuesHook < Redmine::Hook::ViewListener
     return ''
   end
 
+  def helper_issues_show_detail_after_setting(context = {})
+    # These should be setting context[:old_value] and context[:new_value]
+    # But because of redmine bug 3672 I can't.  That sucks and annoys me.
+
+    detail    = context[:detail]
+    field     = detail.prop_key.to_s.gsub(/\_id/, "")
+    label     = context[:label]
+    value     = context[:detail].value
+    old_value = context[:detail].old_value
+
+    if label == "QA contact"
+      context[:detail].value = find_name_by_reflection(field, value)
+      context[:detail].old_value = find_name_by_reflection(field, old_value)
+    end
+  end
 end
